@@ -6,3 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+byteorder = "1.2"
+crc = "1.7"
+serde = "1"
+serde_derive = "1"
+
+[lib]
+name = "libbase_kv"
+path = "src/lib.rs"
+
+[[bin]]
+name = "bkv_mem"
+path = "src/bkv_mem.rs"
