@@ -1,0 +1,2 @@
+# Simpel Key-Value Store
+This is a learning project to discover database technology and learn the internal architecture of a family of database systems using a log-structured, append-only model. The key-value model enables simple queries and doesn’t support asking broader queries.
