@@ -96,7 +96,23 @@ impl BaseKV {
     }
 
     pub fn get(&mut self, key: &ByteStr) -> io::Result<Option<ByteString>> {
-        todo!();
+        let position = match self.index.get(key) {
+            None => return Ok(None),
+            Some(position) => *position,
+        };
+
+        let kv = self.get_at(position)?;
+
+        Ok(Some(kv.value))
+    }
+
+    fn get_at(&mut self, position: u64) -> io::Result<KeyValuePair> {
+        let mut f = BufReader::new(&mut self.f);
+        f.seek(SeekFrom::Start(position))?;
+
+        let kv = BaseKV::process_record(&mut f)?;
+
+        Ok(kv)
     }
 
     pub fn insert(&mut self, key: &ByteStr, value: &ByteStr) -> io::Result<()> {

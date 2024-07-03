@@ -1,6 +1,7 @@
 use libbase_kv::BaseKV;
 use std::env;
 use std::path::Path;
+// use std::str;
 
 #[cfg(target_os = "windows")]
 const USAGE: &str = "
@@ -38,6 +39,7 @@ fn main(){
     match action {
         "get" => match store.get(key).unwrap() {
             None => eprintln!("{:?} not found", key),
+            //str::from_utf8(&value).expect("Failed")
             Some(value) => println!("{:?}", value),
         },
 
