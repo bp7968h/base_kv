@@ -95,11 +95,7 @@ impl BaseKV {
         Ok(KeyValuePair{key, value})
     }
 
-    pub fn get(&self, key: &ByteStr) -> io::Result<Option<ByteString>> {
-        todo!();
-    }
-
-    pub fn delete(&self, key: &ByteStr) -> io::Result<()> {
+    pub fn get(&mut self, key: &ByteStr) -> io::Result<Option<ByteString>> {
         todo!();
     }
 
@@ -140,7 +136,14 @@ impl BaseKV {
         Ok(current_position)
     }
 
-    pub fn update(&self, key: &ByteStr, value: &ByteStr) -> io::Result<()>  {
+    //hint to the compiler to consider inlining
+    //Inlining is an optimization technique where the compiler replaces a function call with the actual code of the function.
+    #[inline]
+    pub fn delete(&mut self, key: &ByteStr) -> io::Result<()> {
+        self.insert(key, b"")
+    }
+
+    pub fn update(&mut self, key: &ByteStr, value: &ByteStr) -> io::Result<()>  {
         todo!();
     }
 }
