@@ -3,8 +3,11 @@ use std::fs::{File, OpenOptions};
 use serde_derive::{Deserialize, Serialize};
 use std::path::Path;
 use std::io::{self, prelude::*, BufReader, ErrorKind, SeekFrom};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use crc::crc32;
 
 type  ByteString = Vec<u8>;
+// not guaranteed to contain valid UTF-8 text.
 type ByteStr = [u8];
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -35,10 +38,13 @@ impl BaseKV {
         Ok(BaseKV{f, index})
     }
 
+    //populates the index of the ActionKV struct, mapping keys to file positions
     pub fn load(&mut self) -> io::Result<()>{
         let mut f = BufReader::new(&mut self.f);
 
         loop {
+            //returns the current position of the cursor within the underlying stream.
+            //When offset is 0, the cursor remains at its current position.
             let position = f.seek(SeekFrom::Current(0))?;
             
             let maybe_kv = BaseKV::process_record(&mut f);
@@ -59,8 +65,34 @@ impl BaseKV {
         Ok(())
     }
 
+    //f may be any type that implements Read, such as a type that reads files, but can also be &[u8].
     fn process_record<R: Read>(f: &mut R) -> io::Result<KeyValuePair> {
-        todo!();
+        let saved_checksum = f.read_u32::<LittleEndian>()?;
+        let key_len = f.read_u32::<LittleEndian>()?;
+        let value_len = f.read_u32::<LittleEndian>()?;
+        let data_len = key_len + value_len;
+
+        let mut data = ByteString::with_capacity(data_len as usize);
+
+        {
+            f.by_ref().take(data_len as u64).read_to_end(&mut data)?;
+        }
+
+        debug_assert_eq!(data.len(), data_len as usize);
+
+        let checksum = crc32::checksum_ieee(&data);
+        //A checksum (a number) verifies that the bytes read from disk are the same as what was intended
+        if checksum != saved_checksum {
+            panic!(
+                "data corruption encountered ({:08x} != {:08x})",
+                checksum, saved_checksum
+            );
+        }
+
+        let value = data.split_off(key_len as usize);
+        let key = data;
+
+        Ok(KeyValuePair{key, value})
     }
 
     pub fn get(&self, key: &ByteStr) -> io::Result<Option<ByteString>> {
