@@ -143,7 +143,8 @@ impl BaseKV {
         self.insert(key, b"")
     }
 
+    #[inline]
     pub fn update(&mut self, key: &ByteStr, value: &ByteStr) -> io::Result<()>  {
-        todo!();
+        self.insert(key, value)
     }
 }
