@@ -10,6 +10,8 @@ byteorder = "1.2"
 crc = "1.7"
 serde = "1"
 serde_derive = "1"
+bincode = "1"
+
 
 [lib]
 name = "libbase_kv"
@@ -18,3 +20,7 @@ path = "src/lib.rs"
 [[bin]]
 name = "bkv_mem"
 path = "src/bkv_mem.rs"
+
+[[bin]]
+name = "bkv_disk"
+path = "src/bkv_disk.rs"
